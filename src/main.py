@@ -19,8 +19,12 @@ app = FastAPI(
 async def root():
     return {
         "status": "ok",
-        "api": "eStatya",
-        "health": "Good!"
+    }
+
+@app.get("/health")
+async def health_check():
+    return {
+        "health": "good"
     }
 
 
