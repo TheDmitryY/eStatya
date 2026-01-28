@@ -168,6 +168,9 @@ dmypy.json
 # Postgres Data ingnore
 pgdata/
 
+# python version ingnore
+.python-version
+
 # Cython debug symbols
 cython_debug/
 
