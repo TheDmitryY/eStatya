@@ -1,8 +1,13 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
+import uuid
 
-class ResponseUserSchema(BaseModel):
+class ResponseUserDTO(BaseModel):
+    id: uuid.UUID
     email: EmailStr
-    username: str
+    role: str
+    username: Optional[str] = None
+    
 
     class Config:
         from_attributes = True

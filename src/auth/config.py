@@ -1,4 +1,4 @@
-from pydantic_setting import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 import logging
 
@@ -9,8 +9,10 @@ class AuthSettings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        env_file_encoding="utf-8"
+        env_file_encoding="utf-8",
+        extra="ignore"
+
     )
 
-    settings = Settings()
+settings = AuthSettings()
 
