@@ -43,14 +43,14 @@ app.include_router(
     tags=["auth"]
     )
 
-@app.get("/")
+@app.get("/api/v1/")
 async def root():
     return {
         "status": "ok",
     }
 
 
-@app.get("/health")
+@app.get("/api/v1/health")
 async def health_check():
     return {"health": "good"}
 
