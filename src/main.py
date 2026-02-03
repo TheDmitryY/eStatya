@@ -1,5 +1,9 @@
 from fastapi import FastAPI
+from src.auth.router import router as auth_router
+from database.config import create_db_and_tables
 import uvicorn
+from contextlib import asynccontextmanager
+
 
 app = FastAPI(
     title="eStatya",
@@ -12,25 +16,48 @@ app = FastAPI(
     license_info={
         "name": "MIT license",
         "url": "https://github.com/TheDmitryY/eStatya/blob/main/LICENSE",
-    }   
+    },
 )
 
-@app.get("/")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_db_and_tables()
+    # redis = aioredis.Redis(
+    #     decode_responses=True,
+    #     host=PROD_REDIS_HOST,
+    #     port=PROD_REDIS_PORT,
+    #     username=PROD_REDIS_ACCOUNT_USERNAME,
+    #     password=PROD_REDIS_ACCOUNT_PASSWORD,
+    # )
+    # FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    # await FastAPILimiter.init(redis)
+    yield
+    # await FastAPILimiter.close()
+
+
+app = FastAPI(lifespan=lifespan, title="eStatya")
+
+app.include_router(
+    auth_router,
+    prefix="/api/v1/auth",
+    tags=["auth"]
+    )
+
+@app.get("/api/v1/")
 async def root():
     return {
         "status": "ok",
     }
 
-@app.get("/health")
+
+@app.get("/api/v1/health")
 async def health_check():
-    return {
-        "health": "good"
-    }
+    return {"health": "good"}
 
 
 if __name__ == "__main__":
     uvicorn.run(
         app=app,
-        host = "127.0.0.1",
-        port = 8000,
+        host="127.0.0.1",
+        port=8000,
     )

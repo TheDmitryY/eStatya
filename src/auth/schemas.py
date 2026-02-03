@@ -1,21 +1,24 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
-class TokenSchema(BaseModel):
+class UserBaseDTO(BaseModel):
+    email: EmailStr
+    password: str
+
+class TokenDTO(BaseModel):
     access_token: str
     token_type: str
 
-class LoginUserSchema(BaseModel):
-    email: EmailStr
-    password: str
+class LoginUserDTO(UserBaseDTO):
+    pass
 
-class CreateUserSchema(BaseModel):
+class CreateUserDTO(BaseModel):
     email: EmailStr
-    username: str
-    password: str
+    username: str = Field(..., min_length=3,max_length=50)
+    password: str = Field(..., min_length=8)
 
-class ForgotUserSchema(BaseModel):
+class ForgotUserDTO(BaseModel):
     email: EmailStr
 
-class VerifyForgotUserSchemas(BaseModel):
+class VerifyForgotUserDTOs(BaseModel):
     token: str
     password: str

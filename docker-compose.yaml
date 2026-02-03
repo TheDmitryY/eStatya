@@ -14,6 +14,24 @@ services:
     networks:
       - estatya
   
+  api:
+    image: smartkit-api:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    working_dir: /app
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+      redis_container:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - estatya
+
   redis_container:
     image: redis:8.4.0
     restart: always

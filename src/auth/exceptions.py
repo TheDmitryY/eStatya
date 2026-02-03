@@ -17,3 +17,6 @@ class InvalidTokenException(BusinessRuleException):
 
 class ExpiredTokenException(BusinessRuleException):
     pass
+
+class EmailException(BusinessRuleException):
+    pass
