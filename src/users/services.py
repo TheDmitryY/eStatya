@@ -3,6 +3,7 @@ from src.users.repository import UserRepository
 from src.auth.schemas import CreateUserDTO
 from src.users.schemas import ResponseUserDTO
 from src.auth.utils import SecurityUtils
+from typing import List
 import uuid
 
 class UserService:
