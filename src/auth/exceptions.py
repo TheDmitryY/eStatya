@@ -15,9 +15,6 @@ class BusinessRuleException(Exception):
 class InvalidRefreshTokenException(BusinessRuleException):
     pass
 
-class InvalidTokenSubjectException(BusinessRuleException):
-    pass
-
 class InvalidTokenException(BusinessRuleException):
     pass
 

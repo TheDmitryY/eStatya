@@ -2,9 +2,9 @@ from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from src.auth.exceptions import (
     InvalidTokenException,
-    InvalidTokenSubjectException,
     InvalidRefreshTokenException
     )
+import time
 from jose import jwt
 from src.auth.config import settings as auth_settings
 
@@ -71,4 +71,37 @@ class SecurityUtils:
             return user_id
         except Exception as error:
             raise InvalidRefreshTokenException(f"Invalid refresh token! Detail: {error}")
+    
+    @staticmethod
+    def verify_access_token(token: str) -> str:
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+            token_type = payload.get("type")
+            user_id = payload.get("sub")
+            user_role = payload.get("role")
+            
+            if token_type != "access":
+                raise InvalidTokenException("Invalid token type")
+            
+            if user_id is None:
+                raise InvalidTokenSubjectException("Token has no subject")
 
+            if payload.get("exp") >= time.time():
+                return payload
+            else:
+                return None
+            
+        except jwt.ExpiredSignatureError:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Token has expired"
+                )
+        except jwt.InvalidTokenError:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Invalid token"
+                )    
+            
+            # return user_id
+        except Exception as error:
+            raise InvalidTokenException(f"Invalid access token! Detail: {error}")
