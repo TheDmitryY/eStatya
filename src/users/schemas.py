@@ -8,7 +8,7 @@ class ResponseUserDTO(BaseModel):
     role: str
     username: Optional[str] = None
     
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True,extra='forbid')
 
 class UserUpdateDTO(BaseModel):
     email: EmailStr

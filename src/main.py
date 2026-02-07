@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from src.auth.router import router as auth_router
+from src.users.router import router as user_router
+from src.admin.router import router as admin_router
 from database.config import create_db_and_tables
 import uvicorn
 from contextlib import asynccontextmanager
@@ -19,6 +21,7 @@ app = FastAPI(
     },
 )
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_db_and_tables()
@@ -37,11 +40,25 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="eStatya")
 
+### Routers Connect
+
 app.include_router(
     auth_router,
     prefix="/api/v1/auth",
     tags=["auth"]
     )
+
+app.include_router(
+    user_router,
+    prefix="/api/v1/users",
+    tags=["users"]
+)
+
+app.include_router(
+    admin_router,
+    prefix="/api/v1/admins",
+    tags=["admins"]
+)
 
 @app.get("/api/v1/")
 async def root():
@@ -59,5 +76,5 @@ if __name__ == "__main__":
     uvicorn.run(
         app=app,
         host="127.0.0.1",
-        port=8000,
+        port=8000
     )

@@ -4,7 +4,9 @@ from src.auth.schemas import CreateUserDTO
 from src.users.schemas import UserUpdateDTO 
 from src.auth.models import User
 import uuid
-from typing import Optional
+from typing import (
+    Optional,List
+    )
 
 class UserRepository:
     def __init__(self, session: AsyncSession):
