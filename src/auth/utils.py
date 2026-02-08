@@ -6,6 +6,7 @@ from src.auth.exceptions import (
     InvalidRefreshTokenException
     )
 import time
+import uuid
 from jose import jwt
 from src.auth.config import settings as auth_settings
 
@@ -15,7 +16,7 @@ class PasswordService(ABC):
         pass
         
     @abstractmethod
-    def get_password_hash(self, password: str) -> str:
+    def hash(self, password: str) -> str:
         pass
 
 class TokenService(ABC):
@@ -28,11 +29,7 @@ class TokenService(ABC):
         pass 
     
     @abstractmethod
-    def verify_refresh_token(self, token: str) -> dict:
-        pass
-
-    @abstractmethod
-    def verify_access_token(self, token: str) -> dict:
+    def verify_token(self, token: str) -> str:
         pass
 
 class ArgonPasswordHasher(PasswordService):
@@ -42,7 +39,7 @@ class ArgonPasswordHasher(PasswordService):
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         return self.pwd_context.verify(plain_password, hashed_password)
 
-    def get_password_hash(self, password: str) -> str:
+    def hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
 
 class JwtTokenService(TokenService):
@@ -51,41 +48,41 @@ class JwtTokenService(TokenService):
         self.algorithm = algorithm
         self.expire_minutes = expire_minutes
 
-    def create_access_token(user_id: str, role: str) -> str:
+    def create_access_token(self, user_id: str, role: str) -> str:
         expire = datetime.now(timezone.utc) + timedelta(minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = (
             {
-                "sub": user_id,
+                "sub": str(user_id),
                 "role": role,
-                "iat": time.time,
+                "iat": time.time(),
                 "exp": expire,
                 "type": "access"
                 }
             )
-        
+
         return jwt.encode(
-            payload, 
-            auth_settings.SECRET_KEY, 
+            payload,
+            auth_settings.SECRET_KEY,
             algorithm=auth_settings.ALGORITHM
         )
-    def create_refresh_token(user_id: str) -> str:
+    def create_refresh_token(self, user_id: str) -> str:
         expire = datetime.now(timezone.utc) + timedelta(minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = (
             {
-                "sub": user_id,
-                "iat": time.time,
+                "sub": str(user_id),
+                "iat": time.time(),
                 "exp": expire,
                 "type": "refresh"
                 }
             )
-        
+
         return jwt.encode(
-            payload, 
-            auth_settings.SECRET_KEY, 
+            payload,
+            auth_settings.SECRET_KEY,
             algorithm=auth_settings.ALGORITHM
         )
-    
-    def verify_token(token: str) -> str:
+
+    def verify_token(self, token: str) -> str:
         try:
             payload = jwt.decode(token, auth_settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM])
             return payload

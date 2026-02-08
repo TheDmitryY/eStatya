@@ -2,7 +2,6 @@ from fastapi import Depends, HTTPException
 from src.users.repository import UserRepository
 from src.auth.schemas import CreateUserDTO
 from src.users.schemas import ResponseUserDTO
-from src.auth.utils import SecurityUtils
 from typing import List
 import uuid
 
@@ -10,7 +9,7 @@ class UserService:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
 
-    async def create_user(self, user_dto: CreateUserDTO) -> ResponseUserDTO:
+    async def register_user(self, user_dto: CreateUserDTO) -> ResponseUserDTO:
         if await self.user_repo.get_by_email(user_dto.email):
             raise HTTPException(
                 status_code=409,
@@ -28,6 +27,7 @@ class UserService:
         new_user = await self.user_repo.create(user_data)
         
         return new_user
+        
 
     async def get_user_profile(self, user_id: uuid.UUID) -> ResponseUserDTO:
         user = await self.user_repo.get_by_id(user_id)

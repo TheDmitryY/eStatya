@@ -11,6 +11,11 @@ from src.auth.schemas import (
     CreateUserDTO,
     LoginUserDTO
     )
+
+from dishka.integrations.fastapi import (
+    FromDishka, inject, setup_dishka,
+)
+
 from src.users.schemas import ResponseUserDTO
 from src.auth.services import AuthService
 from src.users.services import UserService
@@ -29,36 +34,28 @@ router = APIRouter()
 
 
 @router.post("/register", response_model=ResponseUserDTO)
+@inject
 async def register(
-    user_data: CreateUserDTO,
-    service: UserService = Depends(get_user_service)
+    body: CreateUserDTO,
+    service: FromDishka[AuthService]
 ):
-    return await service.create_user(user_data)
+    return await service.register_user(user_dto=body)
 
 
 @router.post("/login")
+@inject
 async def login(
     login_data: LoginUserDTO,
-    service: AuthService = Depends(get_auth_service)
+    service: FromDishka[AuthService]
 ):
-    auth_result = await service.authenticate_user(login_data)
-    token_dto = TokenDTO(access_token=auth_result.access_token)
-    response_content = jsonable_encoder(token_dto)
-    response = JSONResponse(content=response_content)
-    response.set_cookie(
-        key=COOKIE_KEY,
-        value=auth_result.refresh_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        max_age=COOKIE_MAX_AGE
-    )
-    return response
+    token = await service.login_user(login_data.email, login_data.password)
+    return {"access_token": token}
 
 
 @router.post(
     "/refresh-token",
-    response_model=TokenDTO
+    response_model=TokenDTO,
+    deprecated=True
     )
 async def refresh_token(
     response: Response,
