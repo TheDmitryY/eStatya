@@ -19,6 +19,7 @@ class CreateUserDTO(BaseModel):
     email: EmailStr
     username: str = Field(..., min_length=3,max_length=50)
     password: str = Field(..., min_length=8)
+    roles: str = "quest"
 
 class ForgotUserDTO(BaseModel):
     email: EmailStr

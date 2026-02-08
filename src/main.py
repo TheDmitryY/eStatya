@@ -2,6 +2,11 @@ from fastapi import FastAPI
 from src.auth.router import router as auth_router
 from src.users.router import router as user_router
 from src.admin.router import router as admin_router
+from src.auth.provider import AppProvider
+from database.provider import DatabaseProvider
+from dishka import make_async_container
+from src.config import settings
+from dishka.integrations.fastapi import setup_dishka
 from database.config import create_db_and_tables
 import uvicorn
 from contextlib import asynccontextmanager
@@ -25,20 +30,18 @@ app = FastAPI(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_db_and_tables()
-    # redis = aioredis.Redis(
-    #     decode_responses=True,
-    #     host=PROD_REDIS_HOST,
-    #     port=PROD_REDIS_PORT,
-    #     username=PROD_REDIS_ACCOUNT_USERNAME,
-    #     password=PROD_REDIS_ACCOUNT_PASSWORD,
-    # )
-    # FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    # await FastAPILimiter.init(redis)
     yield
-    # await FastAPILimiter.close()
-
 
 app = FastAPI(lifespan=lifespan, title="eStatya")
+
+### Providers
+
+container = make_async_container(
+    AppProvider(),
+    DatabaseProvider(DATABASE_URL=settings.DATABASE_URL)
+)
+
+setup_dishka(container, app)
 
 ### Routers Connect
 
