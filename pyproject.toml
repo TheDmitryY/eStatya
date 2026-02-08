@@ -19,6 +19,7 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "argon2-cffi>=25.1.0",
     "httpx>=0.28.1",
+    "dishka>=1.7.2",
 ]
 [tool.pytest.ini_options]
 pythonpath = "."
