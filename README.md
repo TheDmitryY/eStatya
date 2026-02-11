@@ -132,7 +132,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-If you have any questions or need help, feel free to open an issue in the repository or contact us at [support@estatya.com](mailto:support@estatya.com).
+If you have any questions or need help, feel free to open an issue in the repository.
 
 ---
 
