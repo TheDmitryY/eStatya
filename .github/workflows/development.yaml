@@ -7,6 +7,11 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+     - uses: actions/checkout@v4
+     - run: docker build . --file docker/Dockerfile --tag estatya:latest 
   test:
     runs-on: ubuntu-latest
 
