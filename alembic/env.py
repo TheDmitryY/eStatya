@@ -7,11 +7,15 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
+from src.posts.models import Post
+from src.auth.models import User
+from src.comments.models import Comment
+
 # !!! ВАЖЛИВО !!!
 # Імпортуйте вашу Base та налаштування
 # Перевірте, чи правильні шляхи імпорту для вашого проекту
 from database.config import Base  # Ваша Base (ORM модель)
-from src.config import settings       # Ваші налаштування (URL бази)
+from src.config import settings  # Ваші налаштування (URL бази)
 
 # Цей об'єкт config дає доступ до значень з .ini файлу
 config = context.config
@@ -26,7 +30,7 @@ target_metadata = Base.metadata
 
 # Перезаписуємо URL в alembic.ini на той, що в settings (щоб не дублювати)
 # Це гарантує, що Alembic використовує той самий URL, що й додаток
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL) 
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 # Або settings.DATABASE_URL, якщо у вас інша назва змінної
 
 
@@ -54,7 +58,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     """Створює асинхронний двигун і запускає міграції."""
-    
+
     # Створюємо асинхронний Engine
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
@@ -71,7 +75,7 @@ async def run_async_migrations() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    
+
     # Запускаємо асинхронну функцію через asyncio
     asyncio.run(run_async_migrations())
 
