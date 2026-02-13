@@ -70,7 +70,7 @@ alembic upgrade head
 
 6. Start the development server:
 ```bash
-python -m uvicorn main:app --reload
+python -m uvicorn src.main:app --reload
 ```
 
 ## Usage
