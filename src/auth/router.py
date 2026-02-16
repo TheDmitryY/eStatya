@@ -80,11 +80,9 @@ async def refresh_token(
     return TokenDTO(access_token=auth_result.access_token)
 
 @router.post("/logout")
-async def logout(response: Response):
-    response.delete_cookie(
-        key=COOKIE_KEY,
-        httponly=True,
-        secure=True,
-        samesite="lax"
-    )
-    return {"message": "Logged out"}
+@inject
+async def logout(
+    response: Response,
+    service: FromDishka[AuthService]
+    ):
+    return service.logout_user(response=response)

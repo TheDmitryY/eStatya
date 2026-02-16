@@ -1,6 +1,6 @@
 from src.users.repository import UserRepository
 from src.auth.exceptions import BusinessRuleException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from src.users.schemas import UserEntity
 from src.auth.schemas import (
@@ -60,3 +60,12 @@ class AuthService:
             )
         token = self.token_service.create_access_token(user_id=user.id, role="quest")
         return token
+
+    async def logout_user(response: Response):
+        response.delete_cookie(
+        key=COOKIE_KEY,
+        httponly=True,
+        secure=True,
+        samesite="lax"
+    )
+        return {"message": "Logged out"}
