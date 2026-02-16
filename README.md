@@ -119,10 +119,11 @@ The API uses JWT (JSON Web Tokens) for authentication. To access protected endpo
 We welcome contributions to eStatya! Here's how you can help:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch (`git branch feature-newfeature`)
+3. Move to branch (`git switch feature-newfeature`)
+4. Commit your changes (`git commit -m 'feat(api): add amazing feature'`)
+5. Push to the branch (`git push origin feature-newfeature`)
+6. Open a Pull Request
 
 Please make sure to update tests as appropriate and follow the existing code style.
 
