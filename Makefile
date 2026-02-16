@@ -4,6 +4,12 @@ ruff:
 tests:
 	pytest -v
 
+tests unit:
+	pytest src/tests/unit
+
+tests integ:
+	pytest src/tests/integration
+
 run:
 	docker compose up -d
 
