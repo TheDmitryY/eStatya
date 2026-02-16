@@ -26,12 +26,12 @@ class AppProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def get_auth_service(
         self,
-        a: UserRepository,
-        b: PasswordService,
-        c: TokenService
+        user_repo: UserRepository,
+        passsword_service: PasswordService,
+        token_service: TokenService
     ) -> AuthService:
         return AuthService(
-            user_repo=a,
-            password_hasher=b,
-            token_service=c
+            user_repo=user_repo,
+            password_hasher=passsword_service,
+            token_service=token_service
         )

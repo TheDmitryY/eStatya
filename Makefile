@@ -4,6 +4,12 @@ ruff:
 tests:
 	pytest -v
 
+tests unit:
+	pytest src/tests/unit
+
+tests integ:
+	pytest src/tests/integration
+
 run:
 	docker compose up -d
 
@@ -20,4 +26,5 @@ migrations restore:
 	alembic downgrade -1
 
 build:
-	docker build -t estatya-api:latest docker/
+	sudo rm -rf pgdata
+	docker build -t estatya-api:latest -f docker/Dockerfile .

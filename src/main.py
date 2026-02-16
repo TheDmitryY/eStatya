@@ -6,6 +6,8 @@ from src.auth.provider import AppProvider
 from database.provider import DatabaseProvider
 from dishka import make_async_container
 from src.config import settings
+from src.posts.models import Post
+from src.comments.models import Comment
 from dishka.integrations.fastapi import setup_dishka
 from database.config import create_db_and_tables
 import uvicorn
