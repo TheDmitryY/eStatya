@@ -20,7 +20,23 @@ dependencies = [
     "argon2-cffi>=25.1.0",
     "httpx>=0.28.1",
     "dishka>=1.7.2",
+    "mypy>=1.19.1",
 ]
 [tool.pytest.ini_options]
 pythonpath = "."
 testpaths = ["src/tests"]
+[tool.mypy]
+python_version = "3.13"
+plugins = [
+    "pydantic.mypy"
+]
+ignore_missing_imports = true
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+check_untyped_defs = true
+disallow_any_generics = true
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
