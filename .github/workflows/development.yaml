@@ -10,8 +10,59 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+     - name: Build Dockerfile
      - uses: actions/checkout@v4
-     - run: docker build . --file docker/Dockerfile --tag estatya:latest 
+     - run: docker build . --file docker/Dockerfile --tag estatya:latest
+  сontainer-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and cache API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: estatya-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create env file
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+          DATABASE_URL_POSTGRES: postgresql+asyncpg://test_user:test_password@localhost:5432/test_db
+          PROD_REDIS_ACCOUNT_PASSWORD: dummy_redis_password
+          SECRET_KEY: test
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+          REFRESH_TOKEN_EXPIRE_DAYS: 7
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Check containers health
+        run: |
+          sleep 10
+          docker compose ps
+          if [ $(docker compose ps -q | wc -l) -gt 0 ]; then
+            echo "Success!"
+          else
+            exit 1
+          fi
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
   test:
     runs-on: ubuntu-latest
 
