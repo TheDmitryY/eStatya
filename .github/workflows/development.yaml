@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
      - name: Build Dockerfile
-     - uses: actions/checkout@v4
-     - run: docker build . --file docker/Dockerfile --tag estatya:latest
+       uses: actions/checkout@v4
+       run: docker build . --file docker/Dockerfile --tag estatya:latest
   сontainer-check:
     runs-on: ubuntu-latest
     steps:
