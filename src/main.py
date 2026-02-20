@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from src.auth.router import router as auth_router
 from src.users.router import router as user_router
 from src.admin.router import router as admin_router
+from src.posts.router import router as post_router
 from src.auth.provider import AppProvider
+from src.posts.provider import PostsProvider
 from database.provider import DatabaseProvider
 from dishka import make_async_container
 from src.config import settings
@@ -40,6 +42,7 @@ app = FastAPI(lifespan=lifespan, title="eStatya")
 
 container = make_async_container(
     AppProvider(),
+    PostsProvider(),
     DatabaseProvider(DATABASE_URL=settings.DATABASE_URL)
 )
 
@@ -57,6 +60,11 @@ app.include_router(
     user_router,
     prefix="/api/v1/users",
     tags=["users"]
+)
+app.include_router(
+    post_router,
+    prefix="/api/v1/posts",
+    tags=["posts"]
 )
 
 app.include_router(
