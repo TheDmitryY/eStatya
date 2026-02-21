@@ -1,0 +1,16 @@
+.gitignore
+.python-version
+dev.db
+LICENSE
+Makefile
+pyproject.toml
+README.md
+test_register.py
+uv.lock
+src/tests
+pgdata
+nginx
+.venv
+.ruff_cache
+.pytest_cache
+.github/workflows
