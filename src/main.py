@@ -10,9 +10,13 @@ from dishka import make_async_container
 from src.config import settings
 from src.posts.models import Post
 from src.comments.models import Comment
+from src.middlewars.config import RequestLoggingMiddleware
 from dishka.integrations.fastapi import setup_dishka
+from prometheus_fastapi_instrumentator import Instrumentator
 from database.config import create_db_and_tables
+from loguru import logger
 import uvicorn
+import random
 from contextlib import asynccontextmanager
 
 
@@ -38,6 +42,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="eStatya")
 
+app.add_middleware(RequestLoggingMiddleware)
 ### Providers
 
 container = make_async_container(
@@ -47,6 +52,11 @@ container = make_async_container(
 )
 
 setup_dishka(container, app)
+
+Instrumentator().instrument(app=app).expose(
+    app=app,
+    endpoint="/api/v1/metrics"
+    )
 
 ### Routers Connect
 
@@ -79,11 +89,31 @@ async def root():
         "status": "ok",
     }
 
+logger.info("FastAPI application successfully started and Loguru is working!")
 
 @app.get("/api/v1/health")
 async def health_check():
+    latency = round(random.uniform(0.1, 0.9), 3)
+    logger.info(
+        "Succesful request",
+        extra={
+            "endpoint": "/api/v1/health",
+            "status_code": 200,
+            "latency": latency
+        }
+        )
     return {"health": "good"}
 
+@app.get("/api/v1/error")
+async def error_check():
+    logger.error(
+        "Database connection failed!",
+        extra={
+            "endpoint": "/api/v1/error",
+            "status_code": 500,
+            "db_host": "localhost"}
+            )
+    return {"error": "Boom!"}
 
 if __name__ == "__main__":
     uvicorn.run(

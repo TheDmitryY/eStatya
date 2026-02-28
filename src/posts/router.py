@@ -11,9 +11,11 @@ from dishka.integrations.fastapi import (
 from src.posts.schemas import PostsResponseDTO, PostsUpdateDTO
 from src.posts.services import PostsService
 
+import uuid
+
 router = APIRouter()
 
-@router.get("/", response_model=list(PostsResponseDTO))
+@router.get("/", response_model=list[PostsResponseDTO])
 @inject
 async def get_all_posts(
     skip: int,

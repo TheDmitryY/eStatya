@@ -1,4 +1,4 @@
-from src.auth.exceptions import BusinessRuleException
+from src.middlewars.exceptions import AppDomainError
 
-class PostsException(BusinessRuleException):
+class PostsException(AppDomainError):
     pass

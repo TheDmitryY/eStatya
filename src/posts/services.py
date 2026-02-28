@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from src.posts.repository import PostsRepository
 from src.posts.schemas import PostsResponseDTO, PostsUpdateDTO
 from src.posts.exceptions import PostsException
+import uuid
 
 class PostsService:
     def __init__(self, post_repo: PostsRepository):

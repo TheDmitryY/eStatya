@@ -26,7 +26,7 @@ class PostsRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_all(skip: int, limit: int) -> list(PostsResponseDTO):
+    async def get_all(skip: int, limit: int) -> list[PostsResponseDTO]:
         pass
 
 
@@ -42,7 +42,7 @@ class PosgresPostsRepository(PostsRepository):
             return self._map_to_domain(model=Post)
         return None
 
-    async def get_all(self, skip: int, limit: int) -> list(PostsResponseDTO):
+    async def get_all(self, skip: int, limit: int) -> list[PostsResponseDTO]:
         query = select(Post).limit(limit).offset(skip)
         result = await self.session.execute(query)
         return result.scalars().all()
@@ -50,7 +50,7 @@ class PosgresPostsRepository(PostsRepository):
     async def create(
         self, title: str, body: str, owner_id: uuid.UUID
     ) -> PostsResponseDTO:
-        post_model = Post(title=title, body=body, owner_id=owner_id)
+        post_model = Post(title=title, body=body, user_id=owner_id)
         self.session.add(post_model)
         await self.session.flush()
         await self.session.refresh(post_model)
@@ -69,7 +69,7 @@ class PosgresPostsRepository(PostsRepository):
         await self.session.commit()
         return self._map_to_domain(updated_model)
 
-    def _map_to_domain(model: Post) -> PostsResponseDTO:
+    def _map_to_domain(self, model: Post) -> PostsResponseDTO:
         return PostsResponseDTO(
             id=model.id,
             created_at=model.create_at,

@@ -21,7 +21,6 @@ from src.auth.services import AuthService
 from src.users.services import UserService
 from src.auth.dependencies import get_auth_service
 from src.users.dependencies import get_user_service
-from src.auth.exceptions import BusinessRuleException
 from src.auth.constants import (
     COOKIE_KEY,
     COOKIE_MAX_AGE

@@ -1,5 +1,4 @@
 from src.users.repository import UserRepository
-from src.auth.exceptions import BusinessRuleException
 from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from src.users.schemas import UserEntity
