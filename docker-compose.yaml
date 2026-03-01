@@ -7,12 +7,21 @@ services:
     ports:
       - "80:80"
     volumes:
+      - frontend_build:/usr/share/nginx/html:ro
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - api
+      - frontend
     networks:
       - estatya
   
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/Dockerfile
+    volumes:
+      - frontend_build:/app/dist
+
   api:
     image: estatya-api:latest
     restart: unless-stopped
@@ -140,3 +149,4 @@ volumes:
   pgdata:
   rabbitmq_data:
   app_logs:
+  frontend_build:
