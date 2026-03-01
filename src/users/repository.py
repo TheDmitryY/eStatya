@@ -3,6 +3,9 @@ from sqlalchemy import select,delete, update
 from src.auth.schemas import CreateUserDTO
 from src.users.schemas import UserUpdateDTO, UserEntity, ResponseUserDTO
 from src.auth.models import User
+from src.users.exceptions import DataAccessException
+from sqlalchemy.exc import SQLAlchemyError
+from loguru import logger
 import uuid
 from typing import (
     Optional,List
@@ -45,16 +48,22 @@ class PosgresUserRepository(UserRepository):
         if user_model:
             return self._map_to_domain(user_model)
         return None
+        
     async def get_by_id(self, user_id: uuid.UUID) -> ResponseUserDTO | None:
+        logger.debug(f"Executing DB query to fetch user_id={user_id}")
         query = (
             select(User)
             .where(User.id == user_id)
         )
-        result = await self.session.execute(query)
-        user_model = result.scalar_one_or_none()
-        if user_model:
-            return self._map_to_domain(user_model)
-        return None
+        try:
+            result = await self.session.execute(query)
+            user_model = result.scalar_one_or_none()
+            if user_model:
+                return self._map_to_domain(user_model)
+            return None
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while fetching user {user_id}")
+            raise DataAccessException("Failed to fetch user due to DB error") from e
     
     async def create(self, user: UserEntity) -> ResponseUserDTO:
         user_model = User(

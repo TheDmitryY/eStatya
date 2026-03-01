@@ -2,7 +2,7 @@ ruff:
 	ruff check
 
 tests:
-	pytest -v
+	uv run pytest -v
 
 tests unit:
 	pytest src/tests/unit
@@ -28,3 +28,11 @@ migrations restore:
 build:
 	sudo rm -rf pgdata
 	docker build -t estatya-api:latest -f docker/Dockerfile .
+
+rebuild:
+	docker compose down -v
+	sudo rm -rf pgdata
+	docker build -t estatya-api:latest -f docker/Dockerfile .
+	docker compose up -d
+
+

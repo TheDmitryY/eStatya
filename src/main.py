@@ -2,15 +2,21 @@ from fastapi import FastAPI
 from src.auth.router import router as auth_router
 from src.users.router import router as user_router
 from src.admin.router import router as admin_router
+from src.posts.router import router as post_router
 from src.auth.provider import AppProvider
+from src.posts.provider import PostsProvider
 from database.provider import DatabaseProvider
 from dishka import make_async_container
 from src.config import settings
 from src.posts.models import Post
 from src.comments.models import Comment
+from src.middlewars.config import RequestLoggingMiddleware
 from dishka.integrations.fastapi import setup_dishka
+from prometheus_fastapi_instrumentator import Instrumentator
 from database.config import create_db_and_tables
+from loguru import logger
 import uvicorn
+import random
 from contextlib import asynccontextmanager
 
 
@@ -36,14 +42,21 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="eStatya")
 
+app.add_middleware(RequestLoggingMiddleware)
 ### Providers
 
 container = make_async_container(
     AppProvider(),
+    PostsProvider(),
     DatabaseProvider(DATABASE_URL=settings.DATABASE_URL)
 )
 
 setup_dishka(container, app)
+
+Instrumentator().instrument(app=app).expose(
+    app=app,
+    endpoint="/api/v1/metrics"
+    )
 
 ### Routers Connect
 
@@ -58,6 +71,11 @@ app.include_router(
     prefix="/api/v1/users",
     tags=["users"]
 )
+app.include_router(
+    post_router,
+    prefix="/api/v1/posts",
+    tags=["posts"]
+)
 
 app.include_router(
     admin_router,
@@ -71,11 +89,31 @@ async def root():
         "status": "ok",
     }
 
+logger.info("FastAPI application successfully started and Loguru is working!")
 
 @app.get("/api/v1/health")
 async def health_check():
+    latency = round(random.uniform(0.1, 0.9), 3)
+    logger.info(
+        "Succesful request",
+        extra={
+            "endpoint": "/api/v1/health",
+            "status_code": 200,
+            "latency": latency
+        }
+        )
     return {"health": "good"}
 
+@app.get("/api/v1/error")
+async def error_check():
+    logger.error(
+        "Database connection failed!",
+        extra={
+            "endpoint": "/api/v1/error",
+            "status_code": 500,
+            "db_host": "localhost"}
+            )
+    return {"error": "Boom!"}
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -17,7 +17,7 @@ class UserUpdateDTO(BaseModel):
 
 @dataclass
 class UserEntity:
-    id: int | None
+    id: uuid.UUID | None
     email: str
     username: str | None
     hashed_password: str | None

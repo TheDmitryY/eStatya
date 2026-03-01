@@ -1,21 +1,16 @@
-class BusinessRuleException(Exception):
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(message)
+from src.middlewars.exceptions import AppDomainError
 
-# class UserNotActiveException(BusinessRuleException):
-#     pass
+class EmailAlreadyExistsError(AppDomainError):
+    def __init__(self, email: str):
+        self.email = email
+        self.message = "This email address alredy exists"
+        super().__init__(self.message)
 
-# class UserNotVerifiedException(BusinessRuleException):
-#     pass
 
-# class UserNotSuperUserException(BusinessRuleException):
-#     pass
-
-class InvalidRefreshTokenException(BusinessRuleException):
+class InvalidRefreshTokenException(AppDomainError):
     pass
 
-class InvalidTokenException(BusinessRuleException):
+class InvalidTokenException(AppDomainError):
     pass
 
 # class ExpiredTokenException(BusinessRuleException):

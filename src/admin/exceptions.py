@@ -1,11 +1,11 @@
-from src.auth.exceptions import BusinessRuleException
+from src.middlewars.exceptions import AppDomainError
 
 
-class NotFoundException(BusinessRuleException):
+class NotFoundException(AppDomainError):
     pass
 
-class BanException(BusinessRuleException):
+class BanException(AppDomainError):
     pass
 
-class UnBanException(BusinessRuleException):
+class UnBanException(AppDomainError):
     pass

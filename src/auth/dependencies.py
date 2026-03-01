@@ -38,11 +38,6 @@ def role_required(role: str):
                 status_code=403,
                 detail="Operation not permitted, insufficient role"
             )
-        elif current_user.role != "user":
-            raise HTTPException(
-                status_code=401,
-                detail="Not authenticated"
-            )
         return current_user
     return role_checker
 
