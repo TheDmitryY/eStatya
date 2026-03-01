@@ -6,12 +6,12 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from loguru import logger
 
-log_path = Path("/app/logs")
+log_path = Path("/app/logs") if Path("/app").exists() else Path("logs")
 log_path.mkdir(parents=True, exist_ok=True)
 
 logger.remove()
 logger.add(
-    "/app/logs/app.log",
+    str(log_path / "app.log"),
     format="{message}",
     serialize=True,
     rotation="10 MB",

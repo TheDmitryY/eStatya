@@ -2,7 +2,7 @@ ruff:
 	ruff check
 
 tests:
-	pytest -v
+	uv run pytest -v
 
 tests unit:
 	pytest src/tests/unit
