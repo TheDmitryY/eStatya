@@ -14,7 +14,7 @@ class PostsService:
     async def get_posts(self, id: int) -> PostsResponseDTO:
         posts = await self.post_repo.get_by_id(id=id)
         if not posts:
-            HTTPException(
+            raise HTTPException(
                 status_code=404,
                 detail="Posts not found"
             )
@@ -35,7 +35,7 @@ class PostsService:
     async def delete_posts(self, id: int):
         posts = await self.post_repo.get_by_id(id=id)
         if not posts:
-            HTTPException(
+            raise HTTPException(
                 status_code=404,
                 detail="Post not found"
             )

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.posts.schemas import PostsEntity, PostsResponseDTO
 from src.posts.models import Post
 from sqlalchemy import select, delete, update
+from sqlalchemy.orm import selectinload
 import uuid
 
 import datetime
@@ -35,15 +36,15 @@ class PosgresPostsRepository(PostsRepository):
         self.session = session
 
     async def get_by_id(self, id: int) -> PostsResponseDTO:
-        query = select(Post).where(Post.id == id)
+        query = select(Post).options(selectinload(Post.comments)).where(Post.id == id)
         result = await self.session.execute(query)
         post_schemas = result.scalar_one_or_none()
         if post_schemas:
-            return self._map_to_domain(model=Post)
+            return self._map_to_domain(model=post_schemas)
         return None
 
     async def get_all(self, skip: int, limit: int) -> list[PostsResponseDTO]:
-        query = select(Post).limit(limit).offset(skip)
+        query = select(Post).options(selectinload(Post.comments)).limit(limit).offset(skip)
         result = await self.session.execute(query)
         return result.scalars().all()
 
@@ -53,17 +54,19 @@ class PosgresPostsRepository(PostsRepository):
         post_model = Post(title=title, body=body, user_id=owner_id)
         self.session.add(post_model)
         await self.session.flush()
-        await self.session.refresh(post_model)
+        await self.session.refresh(post_model, attribute_names=["comments"])
         await self.session.commit()
         return self._map_to_domain(post_model)
 
-    async def delete(id: int):
+    async def delete(self, id: int):
         query = delete(Post).where(Post.id == id)
         await self.session.execute(query)
         await self.session.commit()
 
-    async def update(posts: PostsEntity):
-        stmt = update(Post).where(Post.id == posts.id).values(**posts).returning(Post)
+    async def update(self, posts: PostsEntity):
+        stmt = update(Post).where(Post.id == posts.id).values(
+            **posts.model_dump(exclude={"id"}, exclude_unset=True)
+        ).returning(Post)
         result = await self.session.execute(stmt)
         updated_model = result.scalar_one()
         await self.session.commit()
@@ -72,7 +75,9 @@ class PosgresPostsRepository(PostsRepository):
     def _map_to_domain(self, model: Post) -> PostsResponseDTO:
         return PostsResponseDTO(
             id=model.id,
-            created_at=model.create_at,
+            title=model.title,
+            body=model.body,
+            created_at=model.created_at,
             updated_at=model.updated_at,
             user_id=model.user_id,
             comments=model.comments,
