@@ -10,3 +10,7 @@ from src.users.schemas import ResponseUserDTO
 from typing import List
 
 router = APIRouter()
+
+@router.get("/me", response_model=ResponseUserDTO)
+async def get_profile():
+    pass
