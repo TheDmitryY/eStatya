@@ -50,7 +50,9 @@ jobs:
           REFRESH_TOKEN_EXPIRE_DAYS=7
           RABBITMQ_DEFAULT_USER=guest
           RABBITMQ_DEFAULT_PASS=guest
-          EOF
+          AWS_ACCESS_KEY_ID=test
+          AWS_SECRET_ACCESS_KEY=test
+          REGION_NAME=test
 
       - name: Build and start containers
         run: docker compose up -d --build
