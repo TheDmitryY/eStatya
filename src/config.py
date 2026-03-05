@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
     DATABASE_URL: str
+    ENDPOINT_URL: str
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    REGION_NAME: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
