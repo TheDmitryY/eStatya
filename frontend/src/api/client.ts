@@ -10,11 +10,6 @@ export class ApiClientError extends Error {
   }
 }
 
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('access_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -23,11 +18,14 @@ export async function apiRequest<T>(
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...getAuthHeaders(),
     ...(options.headers as Record<string, string> | undefined),
   };
 
-  const response = await fetch(url, { ...options, headers });
+  const response = await fetch(url, {
+    ...options,
+    headers,
+    credentials: 'same-origin',
+  });
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;

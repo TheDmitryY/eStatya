@@ -8,7 +8,7 @@ class ResponseUserDTO(BaseModel):
     email: EmailStr
     role: str
     username: str | None
-    avatar_url: str | None
+    avatar_url: str | None = None
     
     model_config = ConfigDict(from_attributes=True,extra='forbid')
 

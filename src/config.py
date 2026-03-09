@@ -7,9 +7,6 @@ class Settings(BaseSettings):
     admin_email: str = "test@example.com"
     log_level: str = "INFO"
     PROD_REDIS_ACCOUNT_PASSWORD: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
     DATABASE_URL: str
     ENDPOINT_URL: str
     AWS_ACCESS_KEY_ID: str

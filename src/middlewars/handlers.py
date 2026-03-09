@@ -5,7 +5,7 @@ from src.middlewars.exceptions import AppDomainError
 async def app_domain_error_handler(request: Request, exc: AppDomainError):
     return JSONResponse(
         status_code=400,
-        extra={
+        content={
             "message": exc.message
             }
     )

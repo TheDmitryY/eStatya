@@ -15,14 +15,16 @@ export function PostCard({ post }: PostCardProps) {
     post.body.length > 200 ? post.body.slice(0, 200) + '…' : post.body;
 
   return (
-    <article className="post-card">
-      <h2 className="post-card-title">{post.title}</h2>
-      <p className="post-card-body">{preview}</p>
-      <div className="post-card-meta">
-        <span className="post-card-author">
+    <article className="bg-surface border border-border rounded-xl p-5 flex flex-col gap-3 transition-colors hover:bg-surface-hover hover:border-accent cursor-pointer">
+      <h2 className="text-base font-semibold leading-tight text-text-primary">
+        {post.title}
+      </h2>
+      <p className="text-sm text-text-muted flex-1">{preview}</p>
+      <div className="flex justify-between text-xs text-text-muted border-t border-border pt-3">
+        <span className="font-medium text-accent">
           {post.author?.username ?? 'Anonymous'}
         </span>
-        <time className="post-card-date">{date}</time>
+        <time>{date}</time>
       </div>
     </article>
   );

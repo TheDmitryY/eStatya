@@ -31,7 +31,7 @@ class MinioStorageService:
     async def generate_presigned_url(self, object_key: str, expires_in: int = 3600) -> str:
         async with self.session.client("s3", **self.minio_config) as s3:
             try:
-                return await s3.generate_presigned_url(
+                return s3.generate_presigned_url(
                     ClientMethod='get_object',
                     Params={'Bucket': self.bucket_name, 'Key': object_key},
                     ExpiresIn=expires_in

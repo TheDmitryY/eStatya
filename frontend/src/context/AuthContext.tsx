@@ -10,9 +10,11 @@ import * as authApi from '../api/auth';
 import type { CreateUserDTO, LoginUserDTO } from '../types';
 
 interface AuthState {
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
+  userRole: string | null;
+  userId: string | null;
   login: (dto: LoginUserDTO) => Promise<void>;
   register: (dto: CreateUserDTO) => Promise<void>;
   logout: () => void;
@@ -21,48 +23,62 @@ interface AuthState {
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('access_token');
-    if (saved) setToken(saved);
-    setIsLoading(false);
+  const fetchMe = useCallback(async () => {
+    try {
+      const me = await authApi.getMe();
+      setUserId(me.user_id);
+      setUserRole(me.role);
+    } catch {
+      setUserId(null);
+      setUserRole(null);
+    }
   }, []);
 
-  const saveToken = useCallback((accessToken: string) => {
-    localStorage.setItem('access_token', accessToken);
-    setToken(accessToken);
-  }, []);
+  useEffect(() => {
+    fetchMe().finally(() => setIsLoading(false));
+  }, [fetchMe]);
 
   const login = useCallback(
     async (dto: LoginUserDTO) => {
-      const result = await authApi.login(dto);
-      saveToken(result.access_token);
+      await authApi.login(dto);
+      await fetchMe();
     },
-    [saveToken],
+    [fetchMe],
   );
 
   const register = useCallback(
     async (dto: CreateUserDTO) => {
-      const result = await authApi.register(dto);
-      saveToken(result.access_token);
+      await authApi.register(dto);
+      // After registration the user is not auto-logged in via cookie,
+      // so log them in immediately
+      await authApi.login({ email: dto.email, password: dto.password });
+      await fetchMe();
     },
-    [saveToken],
+    [fetchMe],
   );
 
-  const logout = useCallback(() => {
-    authApi.logout().catch(() => {});
-    localStorage.removeItem('access_token');
-    setToken(null);
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore
+    }
+    setUserId(null);
+    setUserRole(null);
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        token,
-        isAuthenticated: !!token,
+        isAuthenticated: !!userId,
         isLoading,
+        isAdmin: userRole === 'admin',
+        userRole,
+        userId,
         login,
         register,
         logout,
