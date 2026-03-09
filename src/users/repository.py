@@ -33,6 +33,14 @@ class UserRepository(ABC):
     async def delete(self, user_id: uuid.UUID) -> None:
         pass
 
+    @abstractmethod
+    async def get_by_email_with_password(self, email: str) -> UserEntity | None:
+        pass
+
+    @abstractmethod
+    async def update_avatar_key(self, user_id: uuid.UUID, avatar_key: str) -> None:
+        pass
+
 class PosgresUserRepository(UserRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -125,3 +133,12 @@ class PosgresUserRepository(UserRepository):
                 role=user_model.role
             )
         return None
+
+    async def update_avatar_key(self, user_id: uuid.UUID, avatar_key: str) -> None:
+        stmt = (
+            update(User)
+            .where(User.id == user_id)
+            .values(avatar_url=avatar_key)
+        )
+        await self.session.execute(stmt)
+        await self.session.commit()

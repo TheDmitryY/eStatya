@@ -4,6 +4,7 @@ export interface User {
   username: string;
   role: string;
   created_at: string;
+  avatar_url?: string | null;
 }
 
 export interface Post {
@@ -14,11 +15,6 @@ export interface Post {
   created_at: string;
   updated_at: string;
   author?: User;
-}
-
-export interface AuthResult {
-  access_token: string;
-  token_type: string;
 }
 
 export interface CreateUserDTO {
@@ -35,3 +31,29 @@ export interface LoginUserDTO {
 export interface ApiError {
   detail: string;
 }
+
+export interface PrometheusResult {
+  status: string;
+  data: {
+    resultType: string;
+    result: Array<{
+      metric: Record<string, string>;
+      value?: [number, string];
+      values?: Array<[number, string]>;
+    }>;
+  };
+}
+
+export interface LokiStream {
+  stream: Record<string, string>;
+  values: Array<[string, string]>;
+}
+
+export interface LokiResult {
+  status: string;
+  data: {
+    resultType: string;
+    result: LokiStream[];
+  };
+}
+

@@ -1,0 +1,110 @@
+name: self-hosted-ci
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  lint:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/dev.txt
+
+      - name: Run ruff linter
+        run: ruff check
+
+  test:
+    runs-on: self-hosted
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/dev.txt
+
+      - name: Run tests with pytest
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+          DATABASE_URL_POSTGRES: postgresql+asyncpg://test_user:test_password@localhost:5432/test_db
+          PROD_REDIS_ACCOUNT_PASSWORD: dummy_redis_password
+          SECRET_KEY: test
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          DATABASE_URL: sqlite+aiosqlite:///test.db
+          REFRESH_TOKEN_EXPIRE_DAYS: 7
+        run: pytest -v
+
+  build:
+    runs-on: self-hosted
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t estatya-api:latest -f docker/Dockerfile .
+
+  container-check:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create env file
+        run: |
+          cat > .env << EOF
+          POSTGRES_USER=test_user
+          POSTGRES_PASSWORD=test_password
+          POSTGRES_DB=test_db
+          DATABASE_URL_POSTGRES=postgresql+asyncpg://test_user:test_password@localhost:5432/test_db
+          PROD_REDIS_ACCOUNT_PASSWORD=dummy_redis_password
+          SECRET_KEY=test
+          ALGORITHM=HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES=30
+          DATABASE_URL=sqlite+aiosqlite:///test.db
+          REFRESH_TOKEN_EXPIRE_DAYS=7
+          RABBITMQ_DEFAULT_USER=guest
+          RABBITMQ_DEFAULT_PASS=guest
+          EOF
+
+      - name: Start containers
+        run: docker compose up -d --build
+
+      - name: Check containers health
+        run: |
+          sleep 10
+          docker compose ps
+          if [ $(docker compose ps -q | wc -l) -gt 0 ]; then
+            echo "All containers are running!"
+          else
+            echo "Container startup failed!"
+            exit 1
+          fi
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v

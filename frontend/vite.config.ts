@@ -10,6 +10,16 @@ export default defineConfig({
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
+      '/prometheus': {
+        target: 'http://127.0.0.1:9090',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/prometheus/, ''),
+      },
+      '/loki': {
+        target: 'http://127.0.0.1:3100',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/loki/, ''),
+      },
     },
   },
 });

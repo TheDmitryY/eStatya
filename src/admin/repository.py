@@ -6,8 +6,9 @@ from src.auth.models import User
 from src.admin.exceptions import NotFoundException
 import uuid
 from typing import (
-    Optional,List
+    Optional
     )
+from collections.abc import Sequence
 
 
 class AdminRepository:
@@ -22,7 +23,7 @@ class AdminRepository:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_all(self, skip: int, limit: int) -> List[User]:
+    async def get_all(self, skip: int, limit: int) -> Sequence[User]:
         query = (
             select(User)
             .limit(limit)
@@ -39,16 +40,7 @@ class AdminRepository:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_all(self, skip: int, limit: int) -> List[User]:
-        query = (
-            select(User)
-            .limit(limit)
-            .offset(skip)
-        )
-        result = await self.session.execute(query)
-        return result.scalars().all()
-
-    async def ban_user(self, user_id: uuid.UUID) -> None:
+    async def ban_user(self, user_id: uuid.UUID) -> User | None:
         user = await self.get_by_id(user_id=user_id)
         query = (
             update(User)
@@ -60,7 +52,7 @@ class AdminRepository:
         await self.session.commit()
         return result.scalar_one_or_none()
     
-    async def unban_user(self, user_id: uuid.UUID):
+    async def unban_user(self, user_id: uuid.UUID) -> User | None:
         user = await self.get_by_id(user_id=user_id)
         query = (
             update(User)
@@ -72,7 +64,7 @@ class AdminRepository:
         await self.session.commit()
         return result.scalar_one_or_none()
 
-    async def unban_user_by_email(self, email: str):
+    async def unban_user_by_email(self, email: str) -> User | None:
         user = await self.get_by_email(email=email)
         query = (
             update(User)
@@ -84,7 +76,7 @@ class AdminRepository:
         await self.session.commit()
         return result.scalar_one_or_none()
 
-    async def get_banned_user(self, user_id: uuid.UUID) -> User:
+    async def get_banned_user(self, user_id: uuid.UUID) -> User | None:
         query = (
             select(User)
             .where(
@@ -95,7 +87,7 @@ class AdminRepository:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_banned_users(self, limit: int, skip: int) -> List[User]:
+    async def get_banned_users(self, limit: int, skip: int) -> Sequence[User]:
         query = (
             select(User)
             .where(
@@ -107,7 +99,7 @@ class AdminRepository:
         result = await self.session.execute(query)
         return result.scalars().all()
     
-    async def ban_user_by_email(self, email: str) -> User:
+    async def ban_user_by_email(self, email: str) -> User | None:
         user = await self.get_by_email(email=email)
         query = (
             update(User)

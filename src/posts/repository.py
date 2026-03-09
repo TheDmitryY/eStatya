@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.posts.schemas import PostsEntity, PostsResponseDTO
+from src.posts.schemas import PostsEntity, PostsResponseDTO, CommentDTO
 from src.posts.models import Post
 from sqlalchemy import select, delete, update
 from sqlalchemy.orm import selectinload
+from collections.abc import Sequence
 import uuid
 
 import datetime
@@ -11,23 +12,27 @@ import datetime
 
 class PostsRepository(ABC):
     @abstractmethod
-    async def create(title: str, body: str, owner_id: uuid.UUID) -> PostsResponseDTO:
+    async def create(self, title: str, body: str, owner_id: uuid.UUID) -> PostsResponseDTO:
         pass
 
     @abstractmethod
-    async def delete(id: int):
+    async def delete(self, id: int):
         pass
 
     @abstractmethod
-    async def update(posts: PostsEntity):
+    async def update(self, posts: PostsEntity):
         pass
 
     @abstractmethod
-    async def get_by_id(id: int) -> PostsResponseDTO:
+    async def get_by_id(self, id: int) -> PostsResponseDTO | None:
         pass
 
     @abstractmethod
-    async def get_all(skip: int, limit: int) -> list[PostsResponseDTO]:
+    async def get_all(self, skip: int, limit: int) -> Sequence[PostsResponseDTO]:
+        pass
+
+    @abstractmethod
+    async def get_by_user_id(self, user_id: uuid.UUID, skip: int, limit: int) -> Sequence[PostsResponseDTO]:
         pass
 
 
@@ -35,7 +40,7 @@ class PosgresPostsRepository(PostsRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_by_id(self, id: int) -> PostsResponseDTO:
+    async def get_by_id(self, id: int) -> PostsResponseDTO | None:
         query = select(Post).options(selectinload(Post.comments)).where(Post.id == id)
         result = await self.session.execute(query)
         post_schemas = result.scalar_one_or_none()
@@ -43,10 +48,24 @@ class PosgresPostsRepository(PostsRepository):
             return self._map_to_domain(model=post_schemas)
         return None
 
-    async def get_all(self, skip: int, limit: int) -> list[PostsResponseDTO]:
+    async def get_all(self, skip: int, limit: int) -> Sequence[PostsResponseDTO]:
         query = select(Post).options(selectinload(Post.comments)).limit(limit).offset(skip)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        posts = result.scalars().all()
+        return [self._map_to_domain(p) for p in posts]
+
+    async def get_by_user_id(self, user_id: uuid.UUID, skip: int, limit: int) -> Sequence[PostsResponseDTO]:
+        query = (
+            select(Post)
+            .options(selectinload(Post.comments))
+            .where(Post.user_id == user_id)
+            .order_by(Post.created_at.desc())
+            .limit(limit)
+            .offset(skip)
+        )
+        result = await self.session.execute(query)
+        posts = result.scalars().all()
+        return [self._map_to_domain(p) for p in posts]
 
     async def create(
         self, title: str, body: str, owner_id: uuid.UUID
@@ -80,6 +99,6 @@ class PosgresPostsRepository(PostsRepository):
             created_at=model.created_at,
             updated_at=model.updated_at,
             user_id=model.user_id,
-            comments=model.comments,
+            comments=[CommentDTO.model_validate(c) for c in model.comments],
         )
 
