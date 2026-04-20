@@ -2,14 +2,18 @@ from fastapi import HTTPException
 from src.posts.repository import PostsRepository
 from src.posts.schemas import PostsResponseDTO, PostsUpdateDTO
 from src.posts.exceptions import PostsException
+from collections.abc import Sequence
 import uuid
 
 class PostsService:
     def __init__(self, post_repo: PostsRepository):
         self.post_repo = post_repo
 
-    async def get_all_posts(self, skip: int, limit: int) -> PostsResponseDTO:
+    async def get_all_posts(self, skip: int, limit: int) -> Sequence[PostsResponseDTO]:
         return await self.post_repo.get_all(skip=skip,limit=limit)
+
+    async def get_posts_by_user(self, user_id: uuid.UUID, skip: int, limit: int) -> Sequence[PostsResponseDTO]:
+        return await self.post_repo.get_by_user_id(user_id=user_id, skip=skip, limit=limit)
 
     async def get_posts(self, id: int) -> PostsResponseDTO:
         posts = await self.post_repo.get_by_id(id=id)

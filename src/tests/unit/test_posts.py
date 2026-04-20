@@ -9,5 +9,5 @@ def mock_posts_repo():
     return Mock()
 
 @pytest.fixture
-def posts_service():
+def posts_service(mock_posts_repo):
     return PostsService(post_repo=mock_posts_repo)

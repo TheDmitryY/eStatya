@@ -1,15 +1,18 @@
 from fastapi import Depends, HTTPException
 from src.users.repository import UserRepository
 from src.auth.schemas import CreateUserDTO
-from src.users.schemas import ResponseUserDTO
+from src.users.schemas import ResponseUserDTO, UserEntity
 from src.users.utils import mask_email
+from src.users.exceptions import RegistrationFailedException
+from src.auth.utils import PasswordService
 from loguru import logger
 from typing import List
 import uuid
 
 class UserService:
-    def __init__(self, user_repo: UserRepository):
+    def __init__(self, user_repo: UserRepository, password_hasher: PasswordService):
         self.user_repo = user_repo
+        self.password_hasher = password_hasher
 
     async def register_user(self, user_dto: CreateUserDTO) -> ResponseUserDTO:
         safe_mail = mask_email(email=user_dto.email)
@@ -21,16 +24,18 @@ class UserService:
                 detail="User with this email already exists"
             )
 
-        hashed_password = SecurityUtils.get_password_hash(user_dto.password)
+        hashed_password = self.password_hasher.hash(user_dto.password)
         try:
 
-            user_data = {
-                "email": user_dto.email,
-                "hashed_password": hashed_password,
-                "role": "quest",
-            }
+            user_entity = UserEntity(
+                id=None,
+                email=user_dto.email,
+                username=user_dto.username,
+                hashed_password=hashed_password,
+                role="quest",
+            )
 
-            new_user = await self.user_repo.create(user_data)
+            new_user = await self.user_repo.create(user_entity)
             logger.info(
                 "User succesfully registered",
                 extra={
@@ -40,7 +45,7 @@ class UserService:
             )
             return new_user
         except Exception as e:
-            logger.error(f"Failed to save user {safe_email} to database: {str(e)}")
+            logger.error(f"Failed to save user {safe_mail} to database: {str(e)}")
             raise RegistrationFailedException() from e
         
 

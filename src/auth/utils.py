@@ -21,7 +21,7 @@ class PasswordService(ABC):
 
 class TokenService(ABC):
     @abstractmethod
-    def create_access_token(self, user_id: uuid.UUID) -> str:
+    def create_access_token(self, user_id: uuid.UUID, role: str) -> str:
         pass
 
     @abstractmethod
@@ -29,7 +29,7 @@ class TokenService(ABC):
         pass 
     
     @abstractmethod
-    def verify_token(self, token: str) -> str:
+    def verify_token(self, token: str) -> dict[str, str]:
         pass
 
 class ArgonPasswordHasher(PasswordService):
@@ -48,7 +48,7 @@ class JwtTokenService(TokenService):
         self.algorithm = algorithm
         self.expire_minutes = expire_minutes
 
-    def create_access_token(self, user_id: str, role: str) -> str:
+    def create_access_token(self, user_id: uuid.UUID, role: str) -> str:
         expire = datetime.now(timezone.utc) + timedelta(minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = (
             {
@@ -65,7 +65,7 @@ class JwtTokenService(TokenService):
             auth_settings.SECRET_KEY,
             algorithm=auth_settings.ALGORITHM
         )
-    def create_refresh_token(self, user_id: str) -> str:
+    def create_refresh_token(self, user_id: uuid.UUID) -> str:
         expire = datetime.now(timezone.utc) + timedelta(minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = (
             {
@@ -82,7 +82,7 @@ class JwtTokenService(TokenService):
             algorithm=auth_settings.ALGORITHM
         )
 
-    def verify_token(self, token: str) -> str:
+    def verify_token(self, token: str) -> dict[str, str]:
         try:
             payload = jwt.decode(token, auth_settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM])
             return payload

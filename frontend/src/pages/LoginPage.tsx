@@ -32,19 +32,23 @@ export function LoginPage() {
   }
 
   return (
-    <main className="container">
-      <div className="auth-card">
-        <h1>Login</h1>
-        <p className="muted">Welcome back to eStatya</p>
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+      <div className="w-full max-w-md bg-surface border border-border rounded-2xl p-8">
+        <h1 className="text-2xl font-bold">Login</h1>
+        <p className="text-text-muted mt-1">Welcome back to eStatya</p>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <div className="mt-4 px-4 py-3 rounded-xl bg-error-bg text-error border border-error text-sm">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <label className="form-label">
-            Email
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <label className="block">
+            <span className="text-sm font-medium">Email</span>
             <input
               type="email"
-              className="form-input"
+              className="mt-1 block w-full rounded-xl bg-bg border border-border px-4 py-2.5 text-text-primary placeholder-text-muted/60 focus:border-accent focus:ring-0 text-sm"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -53,11 +57,11 @@ export function LoginPage() {
             />
           </label>
 
-          <label className="form-label">
-            Password
+          <label className="block">
+            <span className="text-sm font-medium">Password</span>
             <input
               type="password"
-              className="form-input"
+              className="mt-1 block w-full rounded-xl bg-bg border border-border px-4 py-2.5 text-text-primary placeholder-text-muted/60 focus:border-accent focus:ring-0 text-sm"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -68,17 +72,20 @@ export function LoginPage() {
 
           <button
             type="submit"
-            className="btn btn-primary btn-block"
+            className="w-full py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white font-medium text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={submitting}
           >
             {submitting ? 'Logging in…' : 'Login'}
           </button>
         </form>
 
-        <p className="auth-footer">
-          Don't have an account? <Link to="/register">Sign up</Link>
+        <p className="text-center mt-6 text-sm text-text-muted">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-accent hover:text-accent-hover">
+            Sign up
+          </Link>
         </p>
       </div>
-    </main>
+    </div>
   );
 }

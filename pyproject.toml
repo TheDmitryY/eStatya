@@ -24,6 +24,9 @@ dependencies = [
     "pytest-asyncio>=0.24.0",
     "loguru>=0.7.3",
     "prometheus-fastapi-instrumentator>=7.1.0",
+    "pillow>=12.1.1",
+    "aioboto3>=15.5.0",
+    "fastapi-users[sqlalchemy]>=15.0.4",
 ]
 [tool.pytest.ini_options]
 pythonpath = "."
@@ -31,13 +34,16 @@ testpaths = ["src/tests"]
 [tool.mypy]
 python_version = "3.13"
 plugins = [
-    "pydantic.mypy"
+    "pydantic.mypy",
+    "sqlalchemy.ext.mypy.plugin"
 ]
+
 ignore_missing_imports = true
 follow_imports = "silent"
 warn_redundant_casts = true
 warn_unused_ignores = true
 check_untyped_defs = true
+strict_optional = true
 disallow_any_generics = true
 [tool.pydantic-mypy]
 init_forbid_extra = true

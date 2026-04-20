@@ -1,9 +1,11 @@
 
 class AppDomainError(Exception):
     """Базовий клас для всіх помилок бізнес-логіки нашого додатку."""
-    pass
+    def __init__(self, message: str = ""):
+        self.message = message
+        super().__init__(message)
 
 class UserNotFoundError(AppDomainError):
     def __init__(self, identifier: str):
         self.identifier = identifier
-        self.message = f"User with identifier {identifier} not founded."
+        super().__init__(f"User with identifier {identifier} not founded.")

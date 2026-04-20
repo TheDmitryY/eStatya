@@ -22,17 +22,14 @@ logs:
 migrations:
 	alembic upgrade head
 
-migrations restore:
-	alembic downgrade -1
-
 build:
 	sudo rm -rf pgdata
 	docker build -t estatya-api:latest -f docker/Dockerfile .
 
 rebuild:
 	docker compose down -v
-	sudo rm -rf pgdata
 	docker build -t estatya-api:latest -f docker/Dockerfile .
 	docker compose up -d
 
-
+api:
+	 ./stress_test.sh http://localhost 100 5000

@@ -13,40 +13,45 @@ class AdminService:
         users = await self.admin_repo.get_all(skip=skip, limit=limit)
         if not users:
             raise NotFoundException("Users not found")
-        return users
+        return [ResponseUserDTO.model_validate(u) for u in users]
 
     async def get_user(self, user_id: uuid.UUID) -> ResponseUserDTO:
         users = await self.admin_repo.get_by_id(user_id=user_id)
         if not users:
             raise NotFoundException(f"User with id: {user_id} not found")
-        return users
+        return ResponseUserDTO.model_validate(users)
 
     async def ban_user(self, user_id: uuid.UUID) -> ResponseUserDTO:
         users = await self.admin_repo.get_by_id(user_id=user_id)
         if not users:
             raise NotFoundException(f"User with id: {user_id} not found")        
         ban = await self.admin_repo.ban_user(user_id=user_id)
-        return ban
+        if not ban:
+            raise NotFoundException(f"Failed to ban user {user_id}")
+        return ResponseUserDTO.model_validate(ban)
 
     async def unban_user(self, user_id: uuid.UUID) -> ResponseUserDTO:
         users = await self.admin_repo.get_by_id(user_id=user_id)
         if not users:
             raise NotFoundException(f"User with id: {user_id} not found")
         unban = await self.admin_repo.unban_user(user_id=user_id)
-        return unban
+        if not unban:
+            raise NotFoundException(f"Failed to unban user {user_id}")
+        return ResponseUserDTO.model_validate(unban)
 
     async def get_all_banned_users(self, skip: int, limit: int) -> List[ResponseUserDTO]:
-        return await self.admin_repo.get_banned_users(skip=skip, limit=limit)
+        users = await self.admin_repo.get_banned_users(skip=skip, limit=limit)
+        return [ResponseUserDTO.model_validate(u) for u in users]
 
 
     async def get_banned_user(self, user_id: uuid.UUID) -> ResponseUserDTO:
         banned_user = await self.admin_repo.get_banned_user(user_id=user_id)
         if not banned_user:
             raise BanException("Users not found")   
-        return banned_user
+        return ResponseUserDTO.model_validate(banned_user)
 
     async def ban_user_by_email(self, email: str) -> ResponseUserDTO:
         users = await self.admin_repo.ban_user_by_email(email=email)
         if not users:
             raise BanException("Users not found")
-        return users
+        return ResponseUserDTO.model_validate(users)

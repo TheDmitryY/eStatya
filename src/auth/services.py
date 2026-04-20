@@ -9,7 +9,8 @@ from src.auth.schemas import (
     AuthResultDTO
     )
 from src.users.schemas import ResponseUserDTO
-from src.auth.utils import ArgonPasswordHasher, JwtTokenService
+from src.auth.utils import PasswordService, TokenService
+from src.auth.constants import COOKIE_KEY
 from fastapi import HTTPException
 import uuid
 
@@ -17,14 +18,14 @@ class AuthService:
     def __init__(
     self,
     user_repo: UserRepository,
-    password_hasher: ArgonPasswordHasher,
-    token_service: JwtTokenService
+    password_hasher: PasswordService,
+    token_service: TokenService
     ):
         self.user_repo = user_repo
         self.password_hasher = password_hasher
         self.token_service = token_service
 
-    async def register_user(self, user_dto: CreateUserDTO) -> str:
+    async def register_user(self, user_dto: CreateUserDTO) -> ResponseUserDTO:
         user = await self.user_repo.get_by_email(email=user_dto.email)
         if user:
             raise HTTPException(
@@ -45,9 +46,9 @@ class AuthService:
         saved_user = await self.user_repo.create(new_user)
         return saved_user
 
-    async def login_user(self, email: str, password: str) -> str:  # Return string instead of TokenDTO
+    async def login_user(self, email: str, password: str) -> str:
         user = await self.user_repo.get_by_email_with_password(email=email)
-        if not user:
+        if not user or not user.hashed_password:
             raise HTTPException(
                 status_code=409,
                 detail="Invalid credentials"
@@ -57,10 +58,15 @@ class AuthService:
                 status_code=401,
                 detail="Invalid credentials"
             )
-        token = self.token_service.create_access_token(user_id=user.id, role="quest")
+        if not user.id:
+            raise HTTPException(
+                status_code=500,
+                detail="User ID is missing"
+            )
+        token = self.token_service.create_access_token(user_id=user.id, role=user.role)
         return token
 
-    async def logout_user(response: Response):
+    async def logout_user(self, response: Response):
         response.delete_cookie(
         key=COOKIE_KEY,
         httponly=True,
@@ -68,3 +74,6 @@ class AuthService:
         samesite="lax"
     )
         return {"message": "Logged out"}
+
+    async def refresh_session(self, refresh_token: str) -> AuthResultDTO:
+        raise NotImplementedError("refresh_session is not yet implemented")

@@ -18,3 +18,7 @@ export async function createPost(data: {
     body: JSON.stringify(data),
   });
 }
+
+export async function getUserPosts(userId: string, skip = 0, limit = 20): Promise<Post[]> {
+  return apiRequest<Post[]>(`/users/${userId}/posts?skip=${skip}&limit=${limit}`);
+}

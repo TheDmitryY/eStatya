@@ -19,11 +19,13 @@ from dishka.integrations.fastapi import (
 from src.users.schemas import ResponseUserDTO
 from src.auth.services import AuthService
 from src.users.services import UserService
-from src.auth.dependencies import get_auth_service
+from src.auth.dependencies import get_auth_service, get_current_user_claims
 from src.users.dependencies import get_user_service
 from src.auth.constants import (
     COOKIE_KEY,
-    COOKIE_MAX_AGE
+    COOKIE_MAX_AGE,
+    ACCESS_COOKIE_KEY,
+    ACCESS_COOKIE_MAX_AGE
 )
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -45,10 +47,20 @@ async def register(
 @inject
 async def login(
     login_data: LoginUserDTO,
+    response: Response,
     service: FromDishka[AuthService]
 ):
     token = await service.login_user(login_data.email, login_data.password)
-    return {"access_token": token}
+    response.set_cookie(
+        key=ACCESS_COOKIE_KEY,
+        value=token,
+        httponly=True,
+        secure=False,  # Set True in production with HTTPS
+        samesite="lax",
+        max_age=ACCESS_COOKIE_MAX_AGE,
+        path="/",
+    )
+    return {"message": "Login successful"}
 
 
 @router.post(
@@ -74,7 +86,7 @@ async def refresh_token(
         httponly=True,
         secure=False, ## In prod should be True
         samesite="lax",
-        max_age=COOKIE_MAX
+        max_age=COOKIE_MAX_AGE
     )
     return TokenDTO(access_token=auth_result.access_token)
 
@@ -84,4 +96,16 @@ async def logout(
     response: Response,
     service: FromDishka[AuthService]
     ):
-    return service.logout_user(response=response)
+    response.delete_cookie(
+        key=ACCESS_COOKIE_KEY,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/",
+    )
+    return await service.logout_user(response=response)
+
+
+@router.get("/me")
+async def get_me(claims: dict = Depends(get_current_user_claims)):
+    return {"user_id": claims["user_id"], "role": claims["role"]}

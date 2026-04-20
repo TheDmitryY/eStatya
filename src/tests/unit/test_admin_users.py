@@ -25,7 +25,11 @@ def admin_service(mock_admin_repo):
 def sample_user():
     """Sample user data for testing"""
     return ResponseUserDTO(
-        id=uuid.uuid4(), email="test@example.com", role="user", username="testuser"
+        id=uuid.uuid4(),
+        email="test@example.com",
+        role="user",
+        username="testuser",
+        avatar_url=None,
     )
 
 
@@ -38,6 +42,7 @@ def sample_users():
             email=f"user{i}@example.com",
             role="user",
             username=f"user{i}",
+            avatar_url=None,
         )
         for i in range(1, 4)
     ]
@@ -118,7 +123,11 @@ class TestGetUserById:
         """Test get_user returns users with different roles"""
         for role in ["user", "admin", "moderator"]:
             user = ResponseUserDTO(
-                id=uuid.uuid4(), email=f"{role}@example.com", role=role, username=role
+                id=uuid.uuid4(),
+                email=f"{role}@example.com",
+                role=role,
+                username=role,
+                avatar_url=None,
             )
             mock_admin_repo.get_by_id = AsyncMock(return_value=user)
 
@@ -288,7 +297,11 @@ class TestBanUserByEmail:
 
         for email in emails:
             user = ResponseUserDTO(
-                id=uuid.uuid4(), email=email, role="user", username="testuser"
+                id=uuid.uuid4(),
+                email=email,
+                role="user",
+                username="testuser",
+                avatar_url=None,
             )
             mock_admin_repo.ban_user_by_email = AsyncMock(return_value=user)
 
