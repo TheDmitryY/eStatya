@@ -21,7 +21,7 @@ from contextlib import asynccontextmanager
 
 
 app = FastAPI(
-    title="eStatya",
+    title="Some Changes",
     summary="eStatyaAPI for fecth data from backend. LoL :3",
     version="0.0.1",
     root_path="/api/v1",
